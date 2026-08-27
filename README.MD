@@ -6,7 +6,7 @@ This is a Dropwizard app for the Pay Ledger microservice.
 
 The [API Specification](/openapi/ledger_spec.yaml) provides more detail on the paths and operations including examples.
 
-[View the API specification for ledger in Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/alphagov/pay-ledger/master/openapi/ledger_spec.yaml).
+[View the API specification for ledger in Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/govuk-pay/pay-ledger/master/openapi/ledger_spec.yaml).
 
 ## Environment variables
 
