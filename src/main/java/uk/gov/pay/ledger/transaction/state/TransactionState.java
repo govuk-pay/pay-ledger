@@ -104,6 +104,8 @@ public enum TransactionState {
                     Map.entry(SalientEventType.CAPTURE_CONFIRMED, SUCCESS),
                     Map.entry(SalientEventType.CAPTURE_SUBMITTED, SUCCESS),
                     Map.entry(SalientEventType.STATUS_CORRECTED_TO_CAPTURED_TO_MATCH_GATEWAY_STATUS, SUCCESS),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_SYSTEM_CANCELLED_TO_MATCH_GATEWAY_STATUS, FAILED_CANCELLED),
+                    Map.entry(SalientEventType.STATUS_CORRECTED_TO_USER_CANCELLED_TO_MATCH_GATEWAY_STATUS, FAILED_CANCELLED),
                     Map.entry(SalientEventType.CAPTURE_CONFIRMED_BY_GATEWAY_NOTIFICATION, SUCCESS),
                     Map.entry(SalientEventType.CAPTURE_ERRORED, ERROR_GATEWAY),
                     Map.entry(SalientEventType.CAPTURE_ABANDONED_AFTER_TOO_MANY_RETRIES, ERROR_GATEWAY),
