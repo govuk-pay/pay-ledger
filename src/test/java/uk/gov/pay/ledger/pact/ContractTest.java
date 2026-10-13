@@ -95,7 +95,8 @@ public abstract class ContractTest {
 
         createARefundTransaction(parentExternalId, gatewayAccountId, transactionExternalId,
                 100L, "reference1", "description1",
-                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS,
+                2L, 102L);
     }
 
     @State("refund transactions for a transaction exist")
@@ -107,11 +108,13 @@ public abstract class ContractTest {
 
         createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d1",
                 100L, "reference1", "description1",
-                "2018-09-22T10:14:16.067Z", TransactionState.SUBMITTED);
+                "2018-09-22T10:14:16.067Z", TransactionState.SUBMITTED,
+                2L, 102L);
 
         createARefundTransaction(transactionExternalId, gatewayAccountId, "refund-transaction-1d2",
                 200L, "reference2", "description2",
-                "2018-09-22T10:16:16.067Z", TransactionState.ERROR_GATEWAY);
+                "2018-09-22T10:16:16.067Z", TransactionState.ERROR_GATEWAY,
+                3L, -203L);
     }
 
     @State("refund and dispute transactions for a transaction exist")
@@ -152,11 +155,13 @@ public abstract class ContractTest {
 
         createARefundTransaction(transactionExternalId1, gatewayAccountId, "refund-transaction-1d1",
                 150L, "reference1", null,
-                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS);
+                "2018-09-22T10:14:16.067Z", TransactionState.SUCCESS,
+                2L, -152L);
 
         createARefundTransaction(transactionExternalId2, gatewayAccountId, "refund-transaction-1d2",
                 250L, "reference2", null,
-                "2018-10-22T10:16:16.067Z", TransactionState.SUCCESS);
+                "2018-10-22T10:16:16.067Z", TransactionState.SUCCESS,
+                3L, -253L);
     }
 
     @State("two payments and a refund transactions exist for selfservice search")
@@ -772,6 +777,28 @@ public abstract class ContractTest {
                 .withParentExternalId(parentExternalId)
                 .withGatewayAccountId(gatewayAccountId)
                 .withAmount(amount)
+                .withState(state)
+                .withTransactionType(TransactionType.REFUND.name())
+                .withReference(reference)
+                .withDescription(description)
+                .withCreatedDate(parse(createdDate))
+                .withDefaultPaymentDetails()
+                .withDefaultTransactionDetails()
+                .insert(app.getJdbi());
+    }
+
+    private void createARefundTransaction(String parentExternalId, String gatewayAccountId,
+                                          String externalId, Long amount,
+                                          String reference, String description,
+                                          String createdDate, TransactionState state,
+                                          long fee, long netAmount) {
+        aTransactionFixture()
+                .withExternalId(externalId)
+                .withParentExternalId(parentExternalId)
+                .withGatewayAccountId(gatewayAccountId)
+                .withAmount(amount)
+                .withFee(fee)
+                .withNetAmount(netAmount)
                 .withState(state)
                 .withTransactionType(TransactionType.REFUND.name())
                 .withReference(reference)
