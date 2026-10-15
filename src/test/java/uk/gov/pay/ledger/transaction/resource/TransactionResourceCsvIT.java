@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -660,6 +662,70 @@ public class TransactionResourceCsvIT {
         CSVRecord record = csvRecords.get(0);
         assertThat(record.get("a-metadata-key (metadata)"), is("value1"));
         assertThat(record.get("metadata-key-2 (metadata)"), is("value2"));
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+                value = {
+                        "2, -102, 0.02, -1.02",
+                        "null, null, '', -1.00",
+                        "2, null, 0.02, -1.00",
+                        "2, 0, 0.02, 0.00"
+                },
+                nullValues = "null"
+    )
+    public void shouldPopulateRefundFeeAndNetInCSV(
+            Long fee,
+            Long netAmount,
+            String expectedFee,
+            String expectedNet) throws IOException {
+        String gatewayAccountId = "123";
+
+        TransactionFixture paymentTransaction = insertTransaction(
+                null,
+                gatewayAccountId,
+                "PAYMENT",
+                SUCCESS,
+                ZonedDateTime.parse("2018-03-12T16:24:01.123456Z"),
+                1000L,
+                100L,
+                900L,
+                "payment-gateway-transaction-id");
+
+        insertTransaction(
+                paymentTransaction.getExternalId(),
+                gatewayAccountId,
+                "REFUND",
+                SUCCESS,
+                ZonedDateTime.parse("2018-03-13T16:24:01.123456Z"),
+                100L,
+                fee,
+                netAmount,
+                "refund-gateway-transaction-id");
+
+        InputStream csvResponseStream = given().port(port)
+                .accept("text/csv")
+                .get("/v1/transaction/?" +
+                        "account_id=" + gatewayAccountId +
+                        "&fee_headers=true" +
+                        "&page=1" +
+                        "&display_size=5")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType("text/csv")
+                .extract().asInputStream();
+
+        List<CSVRecord> csvRecords = CSVParser.parse(
+                csvResponseStream,
+                UTF_8,
+                RFC4180.withFirstRecordAsHeader()
+        ).getRecords();
+
+        CSVRecord refundRecord = csvRecords.get(0);
+
+        assertThat(refundRecord.get("Amount"), is("-1.00"));
+        assertThat(refundRecord.get("Fee"), is(expectedFee));
+        assertThat(refundRecord.get("Net"), is(expectedNet));
     }
 
     private void assertCommonPaymentFields(CSVRecord csvRecord, TransactionFixture transactionFixture) {
