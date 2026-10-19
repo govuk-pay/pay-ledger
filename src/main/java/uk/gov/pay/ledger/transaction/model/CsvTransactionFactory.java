@@ -141,7 +141,9 @@ public class CsvTransactionFactory {
                 result.put(FIELD_TOTAL_AMOUNT, penceToCurrency(totalOrAmount * -1));
                 result.put(FIELD_ISSUED_BY, safeGetAsString(transactionDetails, "user_email"));
                 result.put(FIELD_STATE, RefundState.getDisplayName(transactionEntity.getState()));
-                result.put(FIELD_NET, penceToCurrency(netOrTotalOrAmount * -1));
+                result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
+                result.put(FIELD_NET, penceToCurrency(Optional.ofNullable(transactionEntity.getNetAmount())
+                        .orElse(netOrTotalOrAmount * -1)));
             }
             if (DISPUTE.name().equals(transactionEntity.getTransactionType())) {
                 result.put(FIELD_STATE, DisputeState.getDisplayName(transactionEntity.getState()));
