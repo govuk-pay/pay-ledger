@@ -123,10 +123,7 @@ public class CsvTransactionFactory {
                         Optional.ofNullable(safeGetAsLong(transactionDetails, "corporate_surcharge")).orElse(0L)
                 ));
 
-                JsonNode feeBreakdownNode = transactionDetails.get("fee_breakdown");
-                if (feeBreakdownNode != null && feeBreakdownNode.isArray()) {
-                    result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
-                }
+                addFeeBreakdownToResults(transactionEntity, transactionDetails, result);
 
                 Boolean requires3ds = safeGetAsBoolean(transactionDetails, "requires_3ds", null);
                 result.put(FIELD_3D_SECURE_REQUIRED, Boolean.TRUE.equals(requires3ds) ? true : null);
@@ -144,6 +141,8 @@ public class CsvTransactionFactory {
                 result.put(FIELD_FEE, penceToCurrency(transactionEntity.getFee()));
                 result.put(FIELD_NET, penceToCurrency(Optional.ofNullable(transactionEntity.getNetAmount())
                         .orElse(netOrTotalOrAmount * -1)));
+
+                addFeeBreakdownToResults(transactionEntity, transactionDetails, result);
             }
             if (DISPUTE.name().equals(transactionEntity.getTransactionType())) {
                 result.put(FIELD_STATE, DisputeState.getDisplayName(transactionEntity.getState()));
@@ -182,6 +181,13 @@ public class CsvTransactionFactory {
         return result;
     }
 
+    private void addFeeBreakdownToResults(TransactionEntity transactionEntity, JsonNode transactionDetails, Map<String, Object> result) {
+        JsonNode feeBreakdownNode = transactionDetails.get("fee_breakdown");
+        if (feeBreakdownNode != null && feeBreakdownNode.isArray()) {
+            result.putAll(getFeeBreakdown(transactionEntity, feeBreakdownNode));
+        }
+    }
+    
     private Map<String, Object> getFeeBreakdown(TransactionEntity transactionEntity, JsonNode feeBreakdown) {
         Map<String, Object> result = new HashMap<>();
         Map<FeeType, Long> aggregatedAmountByFeeType = new HashMap<>();

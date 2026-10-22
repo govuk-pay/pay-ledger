@@ -327,6 +327,38 @@ class CsvTransactionFactoryTest {
         assertThat(csvDataMap.get("Fee (gateway)"), is(nullValue()));
     }
 
+    @Test 
+    void toMapShouldIncludeGatewayFeeBreakdownWhenTransactionIsRefund() {
+        JSONObject gatewayFee = new JSONObject()
+                .put("fee_type", "gateway")
+                .put("amount", 68);
+
+        JSONObject feeBreakdownJsonObject = new JSONObject().put("fee_breakdown", new JSONArray()
+                .put(gatewayFee));
+        
+        var transactionEntity = transactionFixture
+                .withTransactionType(TransactionType.REFUND.name())
+                .withTransactionDetails(feeBreakdownJsonObject.toString())
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+
+        assertThat(csvDataMap.get("Fee (gateway)"), is("0.68"));
+
+    }
+
+    @Test
+    void toMapShouldNotIncludeGatewayFeeBreakdownWhenTransactionIsRefund() {
+        var transactionEntity = transactionFixture
+                .withTransactionType(TransactionType.REFUND.name())
+                .toEntity();
+
+        Map<String, Object> csvDataMap = csvTransactionFactory.toMap(transactionEntity);
+        
+        assertThat(csvDataMap.get("Fee (gateway)"), is(nullValue()));
+
+    }
+
     @Test
     void toMapShouldAggregateFeeBreakdownByFeeTypeWhenDifferentFeeSubTypeArePresent() {
         JSONObject transactionFeeVariable = new JSONObject()
