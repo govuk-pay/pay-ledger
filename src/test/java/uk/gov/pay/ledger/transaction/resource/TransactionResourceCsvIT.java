@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.pay.ledger.extension.AppWithPostgresAndSqsExtension;
 import uk.gov.pay.ledger.metadatakey.dao.MetadataKeyDao;
 import uk.gov.pay.ledger.transaction.state.TransactionState;
@@ -348,8 +349,9 @@ public class TransactionResourceCsvIT {
         assertThat(paymentRecord.get("MOTO"), is("true"));
     }
 
-    @Test
-    public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithIncludeAdditionalFeeHeaders() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"PAYMENT", "REFUND"})
+    public void shouldGetAllTransactionsAsCSVWithAcceptTypeWithIncludeAdditionalFeeHeaders( String transactionType) throws IOException {
         String gatewayAccountId = "123";
 
         JSONObject gatewayFee = new JSONObject()
@@ -361,7 +363,7 @@ public class TransactionResourceCsvIT {
 
         aTransactionFixture()
                 .withGatewayAccountId(gatewayAccountId)
-                .withTransactionType("PAYMENT")
+                .withTransactionType(transactionType)
                 .withTransactionDetails(feeBreakdownJsonObject.toString())
                 .insert(rule.getJdbi());
 
