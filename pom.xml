@@ -12,7 +12,7 @@
         <mainClass>uk.gov.pay.ledger.app.LedgerApp</mainClass>
         <pay-java-commons.version>1.0.20261019091909</pay-java-commons.version>
         <prometheus.version>0.16.0</prometheus.version>
-        <surefire.version>3.6.0</surefire.version>
+        <surefire.version>3.6.1</surefire.version>
         <swagger.version>2.2.55</swagger.version>
         <pact.version>4.7.5</pact.version>
         <PACT_BROKER_URL/>
